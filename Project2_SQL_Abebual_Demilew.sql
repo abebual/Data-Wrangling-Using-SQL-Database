@@ -173,11 +173,14 @@ that there's a different cost for guests and members!
 */
 
 SELECT f.name AS facilityname,
-    SUM ((f.membercost+f.guestcost)*b.slots) AS total_revenue
+	SUM(CASE WHEN b.memid = 0 THEN f.guestcost *b.slots
+        ELSE f.membercost * b.slots END
+        ) AS total_revenue
 FROM Bookings b
 INNER JOIN Facilities f
 ON b.facid = f.facid
 INNER JOIN Members m
 ON b.memid = m.memid
-WHERE total_revenue < 1000
+GROUP BY facilityname
+HAVING total_revenue < 1000
 ORDER BY total_revenue DESC
